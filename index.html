@@ -4,10 +4,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta charset="UTF-8" />
-    <link
-      rel="stylesheet"
-      href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css"
-    />
+    <title>Pi 计划</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css" />
+    <link rel="shortcut icon" href="/static/pi-plan-128.png" type="image/x-icon">
     <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
   </head>
   <body>
@@ -15,9 +14,11 @@
     <script>
       window.$docsify = {
         name: "Pi 计划",
-        coverpage: true,
-        loadSidebar: true,
+        //coverpage: true,
         //loadNavbar: true,
+        notFoundPage: true,
+        loadSidebar: true,
+        subMaxLevel: 2,
         plugins: [
           EditOnGithubPlugin.create(
             "https://github.com/pi-plan/plan/blob/main/",
