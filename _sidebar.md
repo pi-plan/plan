@@ -1,6 +1,7 @@
 <!-- docs/_sidebar.md -->
 
 * [Pi 计划是什么？](/)
+* [术语表](/terminology)
 * PiDAL
     * [介绍](/pidal/introduction)
     * [分库分表](/pidal/sharding)

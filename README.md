@@ -30,6 +30,12 @@ PiLCS(Pi Logical clock Server) 是一个高可用、高性能的「逻辑时间�
 - [了解更多](/pilcs/introduction)
 - [Github](https://github.com/pi-plan/pilcs)
 
+### PiMMS
+PiMMS(Pi Meta Data Manager Server) 是一个高可用的元数据管理中心，负责同步和管理各种元数据和协调各个组件之间的规则。
+- [了解更多](/pimms/introduction)
+- [Github](https://github.com/pi-plan/pimms)
+
+
 ### PRaft
 PRaft 是一个 Python 实现的异步、高性能 [Raft](https://raft.github.io/) [共识算法](https://en.wikipedia.org/wiki/Consensus_(computer_science))库。不仅实现了 Leader 选举、日志复制这些基本逻辑，也实现了是线上环境中实用的 PreVote 逻辑、状态机快照与日志清理、Raft 集群成员动态变更、Leader 节点转移、无投票权成员 Leaner 的特性。
 - [了解更多](/praft/introduction)
