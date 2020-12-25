@@ -3,6 +3,9 @@
 ## Zone
 Zone 是一份能完整支撑业务运行的逻辑单元，可以是一个独立的物理机房，也可以是一个逻辑机房。在 Pi 系统里是逻辑上的一个业务完整运行单元。
 
+## Zone ID
+每个 Zone 有个唯一的编号，在设计中用来标记和区分不同的 Zone。
+
 ## Zone Sharding
 Zone Sharding 是指把业务逻辑分配到不同的 Zone 执行的过程。和 DB Sharding 类似，只是更在以 Zone 层面上。
 
