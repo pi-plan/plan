@@ -202,7 +202,7 @@ PiDTS 的在线全量同步会同时进行两个操作：
 2. Incremental Copy
 
 #### Row Copy
-Row Copy 是复制已经存在的老数据，通过 `select * from xxx order by id limit xxx, 1000` 不断的获取 src Zone 的数据，直到原始数据全部被复制完 Row Copy 操作结束。src Zone 的数据在同步到 dest Zone 的时候会被转换为 `insert` 操作。在 Row Copy 期间产生的数据变更会通过 Incremental Copy 操作被同步到 dest Zone，并不会丢失。
+Row Copy 是复制已经存在的老数据，通过 `select * from xxx order by id` 不断的获取 src Zone 的数据，直到原始数据全部被复制完 Row Copy 操作结束。src Zone 的数据在同步到 dest Zone 的时候会被转换为 `insert` 操作。在 Row Copy 期间产生的数据变更会通过 Incremental Copy 操作被同步到 dest Zone，并不会丢失。
 
 #### Incremental Copy
 Incremental Copy 是实时复制通过日志变更记录来惊醒同步，也就是 PiDTS 正常情况下运行的数据复制模式。Incremental Copy 和 Row Copy 是同时进行的。 Incremental Copy 会把数据变更记录也做一次转换，会把原始的 `insert` 转换为 `insert or update`、 `update` 会根据情况转变为 `insert or update`、`delete` 操作保持不变。在全量复制的时候以 Incremental Copy 复制的数据为准。
