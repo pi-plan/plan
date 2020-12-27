@@ -2,6 +2,7 @@
 
 * [Pi 计划是什么？](/)
 * [术语表](/terminology)
+* [常见问题](/faq)
 * PiDAL
     * [介绍](/pidal/introduction)
     * [分库分表](/pidal/sharding)
