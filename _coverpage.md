@@ -4,11 +4,11 @@
 
 > 让开发变的简单、高效、可靠、稳定。
 
-- 基于 RDBMS 的异地多活方案和实现。
-- 安全、支持跨 sharding 事务的数据库中间件。
-- 支持异构数据库的数据传输服务。
+- 安全、可靠的**「异地多活」**解决方案和组件。
+- 安全、高性能、开源的分布式事务解决方案 **A2PC**。
+- 基于 Raft 算法实现的高可用、高性能的逻辑时间服务。
 
-[GitHub](https://github.com/pi-plan/)
+[GitHub](https://github.com/pi-plan/plan)
 [了解更多](/introduction)
 <!-- background color -->
 ![color](#ffffff)

@@ -70,6 +70,7 @@ select create_time, user_id from user_like_video_1 where video_id = 1 and create
 select create_time, user_id from user_like_video_2 where video_id = 1 and create_time > 0 order by create_time offset 0 limit 2
 ```
 这样总共拿到 4 条数据。内存按照 create_time 排序后返回最前面两条结果。
+
 | user_id | video_id | create_time |
 | :-- | :-- | :-- |
 | 1 | 1 | 10000001 |
