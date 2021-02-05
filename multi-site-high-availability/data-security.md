@@ -1,6 +1,6 @@
 # 数据安全保障
 数据安全是最为重要的点，如果无法保障数据的安全，那么后续的其他功能就失去了意义。  
-首先数据复制的流程可以分为两种场景：
+首先数据复制的流程可以分为三种场景：
 1. 每个 zone 之间正常复制。
 2. 切换 zone 的时候数据复制。
 3. 数据从零开始全量复制。
@@ -114,7 +114,7 @@ class ChangeEventLSN(object):
         self.source_zone_change_no: int = 0
         self.server_id: int = 0  # 产生变更的机器 ID
         self.log_index: int = 0  # 日志文件的 编号
-        self.log_position int = 0  # 日志位置
+        self.log_position: int = 0  # 日志位置
         self.xid: int = 0
         ...... 
 
@@ -202,10 +202,10 @@ PiDTS 的在线全量同步会同时进行两个操作：
 2. Incremental Copy
 
 #### Row Copy
-Row Copy 是复制已经存在的老数据，通过 `select * from xxx order by id` 不断的获取 src Zone 的数据，直到原始数据全部被复制完 Row Copy 操作结束。src Zone 的数据在同步到 dest Zone 的时候会被转换为 `insert` 操作。在 Row Copy 期间产生的数据变更会通过 Incremental Copy 操作被同步到 dest Zone，并不会丢失。
+Row Copy 是复制已经存在的老数据，通过 `select * from xxx order by id` 不断的获取 src Zone 的数据，直到原始数据全部被复制完 Row Copy 操作结束。src Zone 的数据在同步到 dest Zone 的时候会被转换为 `insert ignore into` 操作。在 Row Copy 期间产生的数据变更会通过 Incremental Copy 操作被同步到 dest Zone 不会丢失。
 
 #### Incremental Copy
-Incremental Copy 是实时复制通过日志变更记录来惊醒同步，也就是 PiDTS 正常情况下运行的数据复制模式。Incremental Copy 和 Row Copy 是同时进行的。 Incremental Copy 会把数据变更记录也做一次转换，会把原始的 `insert` 转换为 `insert or update`、 `update` 会根据情况转变为 `insert or update`、`delete` 操作保持不变。在全量复制的时候以 Incremental Copy 复制的数据为准。
+Incremental Copy 是实时复制通过日志变更记录来进行同步，也就是 PiDTS 正常情况下运行的数据复制模式。Incremental Copy 和 Row Copy 是可以同时进行的。 Incremental Copy 会把数据变更记录也做一次转换，会把原始的 `insert` 转换为 `insert or update`、 `update` 会根据情况转变为 `insert or update`、`delete` 操作保持不变。**在全量复制的时候以 Incremental Copy 复制的数据为准**。
 
 #### 安全保障论证
 Row Copy 和 Incremental Copy 同时进行是可以保障数据不会丢失，最终的数据状态也会和 src Zone 一致。针对数据的 `insert`、`update`、`delete` 的三种操作逐一进行说明。

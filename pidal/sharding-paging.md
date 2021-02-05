@@ -218,4 +218,4 @@ PiDAL 里的「**双 sharding 表**」就是为这一问题设计的结局方案
 2. 一致性保障，借助 PiDAL 的[事务保障](/pidal/transaction) 机制，可以保障两份数据一致。
 3. 实时性保障，数据在写入的时候实现双写，不会出现异步延迟之类的问题。
 
-[如何使用双 sharding 表？]()
+[双 Sharding 表](/pidal/double-sharding-table)

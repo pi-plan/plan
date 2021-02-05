@@ -1,0 +1,16 @@
+**感谢这些巨人，让我们看的更远～**  
+
+- [饿了么异地多活技术实现](https://zhuanlan.zhihu.com/p/32009822)
+- [PingCAP 博客](https://pingcap.com/blog-cn/)
+- [Seata](http://seata.io/en-us/)
+- [Vitess](https://vitess.io)
+- [gh-ost](https://github.com/github/gh-ost)
+- [The Raft Consensus Algorithm](https://raft.github.io)
+- [Spanner: Google’s Globally-Distributed Database](https://static.googleusercontent.com/media/research.google.com/en//archive/spanner-osdi2012.pdf)
+- [https://owent.net/2019/1902.html](https://owent.net/2019/1902.html)
+- [The Google File System](https://research.google/pubs/pub51/)
+- [Bigtable: A Distributed Storage System for Structured Data](https://research.google/pubs/pub27898/)
+- [Large-scale Incremental Processing Using Distributed Transactions and Notifications](https://research.google/pubs/pub36726/)
+- [F1: A Distributed SQL Database That Scales](https://research.google/pubs/pub41344/)
+- [ETCD](https://etcd.io)
+- [领域驱动设计](https://book.douban.com/subject/5344973/)

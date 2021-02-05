@@ -3,18 +3,28 @@ Pi 计划的愿景是：让开发这件事变的简单、高效，让应用程�
 - [Github](https://github.com/pi-plan/plan)
 
 ## 第一阶段
+Pi计划第一阶段计划实现：  
+
+> 0. A2PC 一个安全高效的分布式事务协议。
+> 1. PiDAL 一个支持分布式事务的数据库中间。并实现 A2PC 协议。
+> 2. PiLCS 一个基于 Raft 算法的高可用的高性能的逻辑时间服务。
+> 3. PRaft 一个异步、高性能的 Raft 算法库。
+> 4. PiDTS 一个支持全量同步、实时同步、数据同步幂、多主模式下数据防止回环的数据同步服务。
+> 5. PiMMS 一个高可用的元数据管理中心，负责同步和管理各种元数据和协调各个组件之间的规则。
+> 6. 以上各个组件可以独立在各自的场景中使用，结合在一起可以实现业务抽象的[异地多活架构](/multi-site-high-availability/introduction)。
+
 
 ### PiDAL
-PiDAL(Pi Data Access Layer) 是一个纯异步、高性能、兼用 MySQL 通讯协议的数据库中间件。不仅提供了常规的分库、分表、读写分离等功能，还基于 [A2PC 协议]() 实现了分布式事务处理能力，无入侵、对客户端完全透明，无需额外兼容即可保证分库分表后数据的正确性。
+PiDAL(Pi Data Access Layer) 是一个纯异步、高性能、兼用 MySQL 通讯协议的数据库中间件。不仅提供了常规的分库、分表、读写分离等功能，还基于 [A2PC 协议](/a2pc/introduction) 实现了分布式事务处理能力，无入侵、对客户端完全透明，无需额外兼容即可保证分库分表后数据的正确性。
 
-另外，根据对分布式数据库中常见的问题，PiDAL 提供了 [双 Sharding 表](/pidal/sharding-paging) 解决方案，在开发过程中减少因为分库对开发过程的影响。在 PiDTS 组件的协同下，不仅支持数据库在线扩容也支持数据库 Sharding 规则的重新调整。  
+另外，根据对分布式数据库中常见的问题，PiDAL 提供了 [双 Sharding 表](/pidal/introduction?id=双-sharding-表) 解决方案，在开发过程中减少因为分库对开发过程的影响。在 PiDTS 组件的协同下，不仅支持数据库在线扩容也支持数据库 Sharding 规则的重新调整。  
 
 PiDAL 不仅支持以 DB Proxy 模式部署，在容器化实施的比较完善的场景下，PiDAL 也能以 Sidecar 的模式提供支持，可以降低不必要的性能消耗。DB Proxy 和 Sidecar 模式之间的区别和优缺点对比详情可以 [点击这里查看](/pidal/introduction?id=driver、sidecar、dbproxy)。
 - [了解更多](/pidal/introduction)
 - [Github](https://github.com/pi-plan/pidal)
 
 ### A2PC
-**A2PC** （Asynchronous Two-Phase Commit）是一个安全、高性能、开源的分布式事务解决方案。原理上是基于 2PC 算法与 MVCC 结合的演变。相比较 XA 协议（MySQL 等数据库原生支持的 2PC 分布式事务规范）中锁资源周期长，单点，多次网络请求等问题，A2PC 的异步提交和回滚能大大减少锁定周期、网络请求次数减少 30%，在 PiDAL 中优化网络请求，网络请求等待周期减少 50%。
+**A2PC** （Asynchronous Two-Phase Commit）是一个安全、高性能、开源的分布式事务解决方案。原理上是基于 2PC 算法与 MVCC 结合的演变。相比较 [XA 协议](https://zh.wikipedia.org/wiki/X/Open_XA)（MySQL 等数据库原生支持的 2PC 分布式事务规范）中锁资源周期长，单点，多次网络请求等问题，A2PC 的异步提交和回滚能大大减少锁定周期、网络请求次数减少 30%，在 PiDAL 中优化网络请求，网络请求等待周期减少 50%。
 
 PiDAL 实现了 A2PC ，但是为了让更多不能使用 PiDAL 的开发者企业是低成本的使用到 A2PC 方案，这里把 A2PC 的关键操作、步骤、RPC 协议、redo log、undo log、TM 等各种信息角色做出规范，便于在各种语言、数据库、资源、通讯方式的场景下复用。
 - [原理介绍](/pidal/introduction)

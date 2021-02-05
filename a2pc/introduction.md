@@ -4,7 +4,7 @@ A2PC （Asynchronous Two-Phase Commit）是一个安全、高性能、开源的�
 
 至于为什么要一定要使用事务。
 > We believe it is better to have application programmers deal with performance problems due to overuse of transactions as bottlenecks arise, rather than always coding around the lack of transactions.   
-在因为使用事务而引起问题的时候，优化使用使用的方式，而不是放弃使用事务。  
+在因为使用事务而引起问题的时候，优化使用事务的方式优于放弃使用事务。  
 [Spanner: Google’s Globally-Distributed Database](https://static.googleusercontent.com/media/research.google.com/en//archive/spanner-osdi2012.pdf)
 
 ## 事务保障
@@ -45,7 +45,7 @@ PiDAL 在启动的时候会解析表结构并记录下来。
 
 #### 第一阶段
 1. 启动一个事务。`begin`。这个时候 PiDAL 会创建一个 A2PC 事务对象。
-2. 创建一个订单，`insert into order (product_id, user_id, quantity, status) VALUES (2, 1, 3, 0)`;这个时候 PiDAL 会解析这个 SQL，获取到是插入表 `order` ，根据启动的时候解析表结构得到：
+2. 创建一个订单，`insert into order (product_id, user_id, quantity, status) VALUES (2, 1, 3, 0)`;这个时候 PiDAL 会解析这个 SQL（[PiDAL 是不是受限于解析 SQL 的能力？](/faq?id=pidal-是不是受限于解析-sql-的能力？)），获取到是插入表 `order` ，根据启动的时候解析表结构得到：
     - undo log 是 空
     - redo log 是 
     ``` json
@@ -140,3 +140,20 @@ A2PC 除了确保事务操作同时成功和失败之外。事务之间的隔离
 同样也是因为 A2PC 的每个分支事务，都是已经提交了的。但是 A2PC 的 undo log、redo log 机制下依然可以实现读未提交，通过 `reundo_log` 可以直到要查询的数据最后一个事务的 undo log、redo log 以及事务是否提交的等信息，从而实现读已提交。
 
 在 PiDAL 的实现里，出于对性能的考虑，只对 `select for update` 的实现了「读已提交」，对没有普通的读取只有读为提交。
+
+## 与 XA 协议对比
+A2PC 在运行时，不仅减少了 RPC 次数，还大大减少了资源被锁定的周期，单位时间内可以处理更多的业务逻辑而不会被阻塞。在运行，XA 和 A2PC 的对比：  
+
+![A2PC VS XA](../static/a2pc/a2pc-vs-xa.png)
+
+
+## 如何使用 A2PC？
+A2PC 可以在任何数据库中间件、数据库驱动、甚至 ORM 中都可以落地，PiDAL 已经实现了 A2PC ，可以直接使用，或者自己按照 A2PC 规范自己实现。
+后续 Pi 计划也会将 A2PC 整合到一些流行的 ORM 库中，方便更多的项目可以低成本的使用到 A2PC。
+
+| 项目 | 实现角色 | 地址 | 进度 | 说明 |
+| --- |  --- | --- | --- | --- |
+| PiDAL | APP，TM | https://github.com/pi-plan/pidal | 开发中 | |
+| GORM | APP | https://github.com/pi-plan/gorm | 设计中 | Golang 中流行的 ORM 库整合 A2PC |
+| A2PC-MySQL | TM | https://github.com/pi-plan/a2pc-mysql | 开发中 | 直接在 MySQL 上实现 TM 角色 |
+| A2PC-GRPC | APP | https://github.com/pi-plan/grpc-go | 规划中 | 支持跨服务的分布式事务 |
