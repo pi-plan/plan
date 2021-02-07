@@ -2,8 +2,9 @@
 
 - [饿了么异地多活技术实现](https://zhuanlan.zhihu.com/p/32009822)
 - [PingCAP 博客](https://pingcap.com/blog-cn/)
-- [Seata](http://seata.io/en-us/)
 - [Vitess](https://vitess.io)
+- [Apache ShardingSphere](https://shardingsphere.apache.org)
+- [Seata](http://seata.io/en-us/)
 - [gh-ost](https://github.com/github/gh-ost)
 - [The Raft Consensus Algorithm](https://raft.github.io)
 - [Spanner: Google’s Globally-Distributed Database](https://static.googleusercontent.com/media/research.google.com/en//archive/spanner-osdi2012.pdf)

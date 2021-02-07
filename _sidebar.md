@@ -13,15 +13,14 @@
     * [跨 Sharding 分页的难题](/pidal/sharding-paging)
     * [分布式事务](/pidal/transaction)
     * [双 Sharding 表](/pidal/sharding?id=配置)
+* PRaft
+    * [介绍](/praft/introduction)
 * PiDTS
     * [介绍](/pidts/introduction)
     * [数据防止回环](/pidts/data-loopback)
 * PiLCS
     * [介绍](/pilcs/introduction)
-* PRaft
-    * [介绍](/praft/introduction)
 * 如何部署和落地异地多活？
-    * [介绍](/multi-site-high-availability/introduction)
-    * [原理](/xxx)
+    * [异地多活架构](/multi-site-high-availability/introduction)
     * [数据安全保障](/multi-site-high-availability/data-security)
 * [巨人的肩膀](/shoulders-of-giants)
