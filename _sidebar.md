@@ -7,6 +7,7 @@
     * [A2PC 介绍](/a2pc/introduction)
     * [协议规范](/a2pc/specification)
     * [A2PC 解决 TM 单点问题](/a2pc/single-point-of-failure)
+    * [A2PC 在电商场景的应用](/a2pc/a2pc-on-e-commerce)
 * PiDAL
     * [PiDAL 介绍](/pidal/introduction)
     * [分库分表](/pidal/sharding)
