@@ -5,7 +5,7 @@ Pi 计划的愿景是：让开发这件事变的简单、高效，让应用程�
 ## 第一阶段
 Pi计划第一阶段计划实现：  
 
-> 0. A2PC 一个安全的、高性能的分布式事务协议。
+> 0. A2PC 一个安全的、高性能的分布式事务协议，让分布式事务像本地事务一样正确、可靠、简便、高效。
 > 1. PiDAL 一个支持分库、分表、读写分离、支持 A2PC 分布式事务的数据库中间。
 > 2. PiLCS 一个基于 Raft 算法的高可用的高性能的逻辑时间服务。
 > 3. PRaft 一个异步、高性能的 Raft 算法库。
@@ -19,7 +19,7 @@ PiDAL(Pi Data Access Layer) 是一个纯异步、高性能、兼用 MySQL 通讯
 
 另外，根据对分布式数据库中常见的问题，PiDAL 提供了 [双 Sharding 表](/pidal/introduction?id=双-sharding-表) 解决方案，在开发过程中减少因为分库对开发过程的影响。在 PiDTS 组件的协同下，不仅支持数据库在线扩容也支持数据库 Sharding 规则的重新调整。  
 
-PiDAL 不仅支持以 DB Proxy 模式部署，在容器化实施的比较完善的场景下，PiDAL 也能以 Sidecar 的模式提供支持，可以降低不必要的性能消耗。DB Proxy 和 Sidecar 模式之间的区别和优缺点对比详情可以 [点击这里查看](/pidal/introduction?id=driver、sidecar、dbproxy)。
+PiDAL 不仅支持以 DB Proxy 模式部署，在容器化实施的比较完善的场景下，PiDAL 也能以 [Sidecar](https://kubernetes.io/zh/docs/concepts/workloads/pods/#using-pods) 的模式提供支持，可以降低不必要的性能消耗。DB Proxy 和 Sidecar 模式之间的区别和优缺点对比详情可以 [点击这里查看](/pidal/introduction?id=driver、sidecar、dbproxy)。
 - [了解更多](/pidal/introduction)
 - [Github](https://github.com/pi-plan/pidal)
 
