@@ -1,6 +1,6 @@
 # PiDAL
 
-PiDAL(Pi Data Access Layer) 是一个纯异步、高性能、兼用 MySQL 通讯协议的数据库中间件。不仅提供了常规的分库、分表、读写分离等功能，还基于 [A2PC 协议](/a2pc/introduction) 实现了分布式事务处理能力，无入侵、对客户端完全透明，无需额外兼容即可保证分库分表后数据的正确性。
+PiDAL(Pi Data Access Layer) 是一个纯异步、高性能、兼容 MySQL 通讯协议的数据库中间件。不仅提供了常规的分库、分表、读写分离等功能，还基于 [A2PC 协议](/a2pc/introduction) 实现了分布式事务处理能力，无入侵、对客户端完全透明，无需额外兼容即可保证分库分表后数据的正确性。
 
 - [Github](https://github.com/pi-plan/pidal)
 
