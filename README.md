@@ -22,13 +22,13 @@ PiDAL 不仅支持以 DB Proxy 模式部署，在容器化实施的比较完善�
 - [了解更多](/pidal/introduction)
 - [Github](https://github.com/pi-plan/pidal)
 
-### A2PC
-**A2PC** （Asynchronous Two-Phase Commit）是一个安全、高性能、开源的分布式事务解决方案。原理上是基于 2PC 算法与 MVCC 结合的演变。相比较 [XA 协议](https://zh.wikipedia.org/wiki/X/Open_XA)（MySQL 等数据库原生支持的 2PC 分布式事务规范）中锁资源周期长，单点，多次网络请求等问题，A2PC 的异步提交和回滚能大大减少锁定周期、网络请求次数减少 30%，在 PiDAL 中优化网络请求，网络请求等待周期减少 50%。
+### A2PC 协议
+**A2PC** （Asynchronous Two-Phase Commit）是一个安全、高性能、开源的分布式事务解决方案 / 协议。原理上是基于 2PC 算法与 MVCC 结合的演变。相比较 [XA 协议](https://zh.wikipedia.org/wiki/X/Open_XA)（MySQL 等数据库原生支持的 2PC 分布式事务规范）中锁资源周期长，单点，网络请求多等问题，A2PC 能减少 30% 的网络 请求、减少 50% 的网络请求等待周期、大大减少锁等待时间，A2PC 中的事务管理器支持高可用部署、[避免单点问题](/a2pc/single-point-of-failure)。
 
 PiDAL 实现了 A2PC ，但是为了让更多不能使用 PiDAL 的开发者企业是低成本的使用到 A2PC 方案，这里把 A2PC 的关键操作、步骤、RPC 协议、redo log、undo log、TM 等各种信息角色做出规范，便于在各种语言、数据库、资源、通讯方式的场景下复用。
-- [原理介绍](/pidal/introduction)
-- [协议规范](https://github.com/pi-plan/pidal)
-- [A2PC 实现列表](https://github.com/pi-plan/pidal)
+- [原理介绍](/a2pc/introduction)
+- [协议规范](/a2pc/specification)
+- [A2PC 在电商场景的应用](/a2pc/a2pc-on-e-commerce)
 
 
 ### PiDTS
