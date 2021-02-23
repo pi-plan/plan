@@ -16,11 +16,11 @@
     * [双 Sharding 表](/pidal/sharding?id=配置)
 * PRaft
     * [PRaft 介绍](/praft/introduction)
+* PiLCS
+    * [PiLCS 介绍](/pilcs/introduction)
 * PiDTS
     * [PiDTS 介绍](/pidts/introduction)
     * [数据防止回环](/pidts/data-loopback)
-* PiLCS
-    * [PiLCS 介绍](/pilcs/introduction)
 * 如何部署和落地异地多活？
     * [异地多活架构](/multi-site-high-availability/introduction)
     * [数据安全保障](/multi-site-high-availability/data-security)
