@@ -18,6 +18,7 @@
     * [PRaft 介绍](/praft/introduction)
 * PiLCS
     * [PiLCS 介绍](/pilcs/introduction)
+    * [PiLCS 在异地多活架构中落地](/pilcs/pilcs-on-multi-site-high-availability)
 * PiDTS
     * [PiDTS 介绍](/pidts/introduction)
     * [数据防止回环](/pidts/data-loopback)
