@@ -1,6 +1,6 @@
 <!-- _navbar.md -->
 
-* 文档
+* 项目
     * [Pi 计划](/introduction)
     * [A2PC](/a2pc/introduction)
     * [PiDAL](/pidal/introduction)
