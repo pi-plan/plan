@@ -95,15 +95,15 @@ PiDAL 在启动的时候会解析表结构并记录下来。
 A2PC 有全局锁，在并发写的是也不会发生数据的赃写。
 还以上面的场景为例子，用户 1 和用户 2 同时下单，分别下单 3 个商品。初始场景下 商品库存数为 10 。
 1. 因为 order 表中用户 1 和用户 2 的全局锁并不冲突，这两个订单可以并发的创建。  
-2. 到了减少库存这一步骤，假设用户 1 和用户 2 直接执行 `update product set stock = stock - 3 where id = 2`，不执行` for update `获取本地锁。因为用户 1 和用户 2 是在同一个数据节点竞争同一个数据的本地锁，因为这里是本地锁，最终只会有一个人拿到本地锁，假设用户 1 拿到本地锁，用户 1 执行 `update product set stock = stock - 3 where id = 2`, PiDAL 正常执行 undo log、redo log 逻辑。此时用户 2 还在等待获取本地锁。
+2. 到了减少库存这一步骤，假设用户 1 和用户 2 直接执行 `update product set stock = 3 where id = 2`，不执行` for update `获取本地锁。因为用户 1 和用户 2 是在同一个数据节点竞争同一个数据的本地锁，因为这里是本地锁，最终只会有一个人拿到本地锁，假设用户 1 拿到本地锁，用户 1 执行 `update product set stock = 3 where id = 2`, PiDAL 正常执行 undo log、redo log 逻辑。此时用户 2 还在等待获取本地锁。
 3. 用户 1 在本地事务提交之前，会向 TM 申请 product 表中 `id = 2` 的全局锁，拿到后提交本地事务，释放本地锁。此时用户 2 拿到 `id = 2` 的本地锁。
-4. 用户 2 在拿到本地锁之后，执行 `update product set stock = stock - 3 where id = 2` 此时 PiDAL 解析 SQL 并生成 undo log、redo log：
+4. 用户 2 在拿到本地锁之后，执行 `update product set stock = 2 where id = 2` 此时 PiDAL 解析 SQL 并生成 undo log、redo log：
     - 因为没有执行 ` for update ` PiDAL 的事务对象没有 undo 数据，PiDAL 会自己执行 `select * from product where id = 2 for update` 确保拿到最新数据。此时的 undo log 是：
     ```json
     {
         "id": 2,
         "product_name": "测试商品",
-        "stock": 7
+        "stock": 5
     }
     ```
     - redo log 是：
@@ -111,7 +111,7 @@ A2PC 有全局锁，在并发写的是也不会发生数据的赃写。
     {
         "id": 2,
         "product_name": "测试商品",
-        "stock": 4
+        "stock": 3
     }
     - 用户 2 生成 redo undo log 插入数据库，此时本地事务并未提交。
 
@@ -119,6 +119,7 @@ A2PC 有全局锁，在并发写的是也不会发生数据的赃写。
 
 #### 用户 1 正常提交
 用户 1 正常提交之后，用户 2 拿到本地数据就是正确的，可以继续正常的执行操作。这样用户 2 的提交和回滚和用 1 无关了。
+![A2PC concurrent commit](../static/a2pc/a2pc-concurrent-commit.png)
 
 #### 用户 1 回滚
 如果用户 1 决定回滚事务，此时 product 表中 `id = 2` 全局锁依然在用户 1 这里，用户 2 的本地事务会因为拿不到全局锁而不会进行提交。
@@ -129,6 +130,7 @@ A2PC 有全局锁，在并发写的是也不会发生数据的赃写。
 4. 因为用户 2 已经释放了 product 表中 `id = 2` 的本地锁，用户 1 拿到本地锁，用户 1 的操作开始回滚。
 5. 此时用户 1 和用户 2 的事务都已经回滚，数据安全，没有发生脏写。
 
+![A2PC concurrent corollbackmmit](../static/a2pc/a2pc-concurrent-rollback.png)
 
 ## 事务隔离
 A2PC 除了确保事务操作同时成功和失败之外。事务之间的隔离依然重要。在 A2PC 的实现中可以根据需求实现: [读已提交](https://zh.wikipedia.org/wiki/事務隔離)、[读已提交](https://zh.wikipedia.org/wiki/事務隔離) 两种隔离。  
