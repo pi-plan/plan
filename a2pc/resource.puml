@@ -1,0 +1,95 @@
+@startuml
+interface Resource {
+    String identity()  // 获取资源标识
+}
+
+package "tools" {
+    interface GlobalLock {
+        Resource acquire(String identity)  // 申请全局锁
+        null release(String identity)  // 释放全局锁
+    }
+
+    interface IntentLock
+
+    interface Isolation {
+        Resource read(String identity)  // 读取数据
+        null write(Resource resource)  // 写数据
+    }
+
+    abstract class Serializable
+
+    abstract class RepeatableReads
+
+    abstract class ReadCommitted
+
+    abstract class ReadUncommitted
+}
+note top of tools : "这里的都是实现好的工具，可以直接拿来用。\n甚至业务都不需要关心只需要标记自己需要实现那种隔离级别就好了。\nbusiness 里的对象会自动实现和处理。"
+
+package "business" {
+
+    package "rollbackable" {
+        interface Rollbackable {
+            null begin()  // 本地事务启动
+            object action(object)  // 操作业务逻辑
+            null commit()  // 提交本地事务
+            null rollback()  // 回滚本地事务
+        }
+
+        abstract class XA {
+            null precommit()  // 预提交
+        }
+
+        abstract class A2PC {
+            JSON undo_log()  // 获取回滚镜像
+            JSON redo_log()  // 获取成功镜像
+            null rollback(object)  // 回滚操作
+        }
+
+        abstract class SAGA {
+            null action()  // 执行业务逻辑操作
+            null rollback()  // 执行业务回回滚操作
+        }
+    }
+
+    package "unrollbackable" {
+        interface Unrollbackable {
+            object action(object)  // 操作业务逻辑
+        }
+        abstract class TCC {
+            object action(object)  // 操作业务逻辑
+        }
+
+        abstract class BASE {
+            object action(object)  // 操作业务逻辑
+        }
+    }
+}
+note top of business : "业务只需要根据情况，\n实现不同的接口即可。\n剩余的逻辑中间件全部处理好。"
+
+
+Resource <|-- GlobalLock
+
+GlobalLock <|-- IntentLock
+
+GlobalLock <|-- Isolation
+IntentLock <|-- Isolation
+
+Isolation <|-- Serializable
+Isolation <|-- RepeatableReads
+Isolation <|-- ReadCommitted
+Isolation <|-- ReadUncommitted
+
+Resource <|-- Rollbackable
+Resource <|-- Unrollbackable
+
+Rollbackable <|-- XA
+Rollbackable <|-- A2PC
+ReadCommitted <|-- A2PC
+Rollbackable <|-- SAGA
+
+Unrollbackable <|-- TCC
+GlobalLock <|-- TCC
+Unrollbackable <|-- BASE
+
+@enduml

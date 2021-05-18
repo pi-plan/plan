@@ -11,7 +11,7 @@ A2PC 共有 TM，RM，APP 三种角色。三种角色缺一不可。在实现的
 TM 负责处理的行为有：
 
 1. 接收和处理来自 APP 的 begin 行为。开启一个分布式事务，负责生成 XID 。[可选]
-2. 接收和处理来自 APP 的 acquire_lock 行为，并负责注册一个分支事务，并负责维护全局锁状态。
+2. 接收和处理来自 APP 的 acquire_lock 行为，并负责注册一个分支事务和 reundo log 的持久化、并负责维护全局锁状态。
 3. 接收和处理来自 APP 的 commit 行为，执行提交事务，修改该事务状态。
 4. 接收和处理来自 APP 的 rollback 行为，执行事务的回滚，并向每个分支事务中的 RM 发起 rollback_branch 分支事务回滚操作。
 5. 自动发起 compensation 事务补偿行为，在部分执行失败、超时的行为后能够进行补偿。
@@ -25,26 +25,24 @@ RM 负责处理的行为有：
 1. 接收和处理来自 APP 的 begin_local 开启分支事务行为。
 2. 接收和处理来自 APP 的 acquire_local_lock 行为。并负责维护本地锁的状态。
 3. 接收和处理来自 APP 的 dml 行为。负责数据 dml 的正确执行。
-4. 接收和处理来自 APP 的 write_reundo_log 行为，并提供机制可以确保和 APP 的 dml 行为在同一个本地事务中。
-5. 接收和处理来自 APP 的 commit_local 提交分支事务行为。确保 dml 和 reundo log 被一同提交。
-6. 接收和处理来自 APP 的 rollback_local 回滚分支事务行为。确保 dml 和 reundo log 被一同回滚。
-7. 接收和处理来自 TM 的 rollback_branch 行为，并完成分支事务回滚操作。
+4. 接收和处理来自 APP 的 commit_local 提交分支事务行为。确保本地事务提交。
+5. 接收和处理来自 APP 的 rollback_local 回滚分支事务行为。确保本地事务回滚。
+6. 接收和处理来自 TM 的 rollback_branch 行为，并完成分支事务回滚操作。
 
 ### APP
-其中应用程序(Application Program，简称 APP)，APP 负责定义全局事务和分支事务的边界，还负责操作 RM 的资源，同时还需要负责生成和插入 reundo log。
+其中应用程序(Application Program，简称 APP)，APP 负责定义全局事务和分支事务的边界，还负责操作 RM 的资源，同时还需要负责生成 reundo log。
 
 负责的行为有：
 
 1. 向 TM 发起 begin 行为。开启一个分布式事务。[可选]
-2. 向 TM 发起 acquire_lock 行为，申请全局锁。
-3. 向 RM 发起 begin_local 开启分支事务行为。
-4. 向 RM 发起 dml 行为。操作 RM 上的资源。
-5. 生成 reundo log ，并向 RM 发起 write_reundo_log 行为。配合 RM 一起确保 write_reundo_log 和 dml 行为在同一个本地事务中。
-6. 向 TM 发起 acquire_lock 行为，申请全局锁，并能正确的处理超时回滚。
-7. 向 RM 发起 commit_local 行为，提交本地事务。
-8. 向 RM 发起 rollback_local 行为，回滚本地事务。
-9. 向 TM 发起 commit 行为，提交全局事务。
-10. 向 TM 发起 rollback 行为，回滚全局事务。
+2. 向 RM 发起 begin_local 开启分支事务行为。
+3. 向 RM 发起 dml 行为。操作 RM 上的资源。
+4. 生成 reundo log。
+5. 向 TM 发起 acquire_lock 行为，发送 undo log、申请全局锁，并能正确的处理超时回滚。
+6. 向 RM 发起 commit_local 行为，提交本地事务。
+7. 向 RM 发起 rollback_local 行为，回滚本地事务。
+8. 向 TM 发起 commit 行为，提交全局事务。
+9. 向 TM 发起 rollback 行为，回滚全局事务。
 
 ## 数据结构
 
@@ -76,23 +74,28 @@ CREATE TABLE `product` (
 #### Redo Log
 Redo Log 是数据变更后的数据镜像，通过 redo log 可以在需要的场景下对数据进行校验和补偿。格式和要求与 undo log 完全一致。
 
-#### reundo_log 表结构
-如果是关系型数据库作为 RM，那么 reundo log 的表结构是：
+#### TM 持久化表结构
+如果是关系型数据库作为 RM，持久化每个分支事务的表结构是：
+
 ```sql
-CREATE TABLE `reundo_log` (
-  `xid` bigint(20) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `branch_transaction` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `lock_key` varchar(255) NOT NULL,
-  `context` varchar(2000) DEFAULT NULL,
-  `reundo_log` longblob NOT NULL,
+  `xid` bigint(20) DEFAULT NULL,
+  `node` varchar(255) DEFAULT NULL,
   `table` varchar(128) NOT NULL,
-  `client_id` varchar(64) DEFAULT NULL,
+  `reundo_log` longblob NOT NULL,
+  `status` tinyint(4) DEFAULT NULL,
+  `context` varchar(2000) DEFAULT '',
+  `client_id` varchar(64) DEFAULT '',
   `create_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `update_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id`),
-  KEY `un_xid` (`xid`),
-  KEY `un_undo_log` (`table`,`lock_key`)
+  UNIQUE KEY `un_lock` (`node`,`table`,`lock_key`),
+  KEY `in_xid` (`xid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
+
 如果 RM 不是关系型数据库，那么可以有自定义的实现形式，不过需要包含和满足下表的数据结构要求。
 
 | 字段 | 类型 | 长度 | 例子 | 说明 |
@@ -102,6 +105,7 @@ CREATE TABLE `reundo_log` (
 | context | string | 自定义 | | 用来存储事务所在的一些上下文 |
 | reundo_log | string | 尽量大 | {"undo":[{"id":2,"product_name":"测试商品","stock":10}],"redo":[{"id":2,"product_name":"测试商品","stock":7}]} | 用来存储事务中生成的 reundo log |
 | table | string | 128 字符 | order | 同一类数据的集合名字，比如数据库中的表 |
+| status | int | 4 | 1 | 分支事务的状态 |
 | client_id | string | 64 字符 | 10.24.1.123 | 客户端的标识，便于追踪事务 |
 | create_time | 时间 | 2020-10-04 21:08 :44.259888 | 精确到微秒 | 事务创建时间，便于追踪事务 |
 | update_time | 时间 | 2020-10-04 21:08 :44.259888 | 精确到微秒 | 事务最后一次修改的时间，便于追踪事务|
@@ -115,7 +119,8 @@ CREATE TABLE `reundo_log` (
   "node": "db0",
   "table": "order",
   "lock_key": "id=2",
-  "context": null
+  "context": null,
+  "reundo_log": null
 }
 ```
 每个字段的含义：
@@ -128,6 +133,7 @@ CREATE TABLE `reundo_log` (
 | table | string | 128 字符 | order | 同一类数据的集合名字，比如数据库中的表 |
 | lock_key | string | 255 字符 | id=2 | 用来区分事务中变更数据的唯一标识 |
 | context | string |  |  | 事务运行的上下文。 |
+| reundo_log | string|object |  |  | 申请全局锁的时候带上的 reundo log |
 
 其中的 `action` `xid` 字段是必须的，其他的可以根据 RPC 行为的不同为取舍。
 
@@ -154,7 +160,7 @@ RPC 调用时的返回值，其数据结构用 json 描述位：
 开启一个分布式事务，并生成 XID，如果 XID 由 APP 生成，这一步骤行为可以省略，在第一次 ACQUIRE_LOCK 的时候创建 一个事务对象即可。属于 APP 和 TM 之间的 RPC 调用，参数和响应值遵循 RPC 对象数据结构。
 
 #### ACQUIRE_LOCK
-获取数据的全局锁，如果出现锁竞争会等待到指定时间，然后返回 APP 无法获取到全局锁。属于 APP 和 TM 之间的 RPC 调用，参数和响应值遵循 RPC 对象数据结构。除了获取全局锁，还同时注册了分支事务信息，某些场景下可以同时负责 redo undo log 的存储，优化响应时间。
+获取数据的全局锁，如果出现锁竞争会等待到指定时间，然后返回 APP 无法获取到全局锁。属于 APP 和 TM 之间的 RPC 调用，参数和响应值遵循 RPC 对象数据结构。除了获取全局锁、还同时注册了分支事务信息、负责持久化 redo undo log 的存储。
 
 #### COMMIT
 提交一个全局事务。属于 APP 和 TM 之间的 RPC 调用，参数和响应值遵循 RPC 对象数据结构。
@@ -176,9 +182,6 @@ RPC 调用时的返回值，其数据结构用 json 描述位：
 
 #### DML
 对数据的增删该查行为，是 APP 向 RM 发起的行为，如果 RM 是关系型数据库，遵循 SQL 标准。
-
-#### WRITE_REUNDO_LOG
-创建数据变更的 reundo log 是 APP 向 RM 发起的行为，如果 RM 是关系型数据库，遵循 SQL 标准。
 
 #### COMMIT_LOCAL
 提交一个本地事务，是 APP 向 RM 发起的行为，如果 RM 是关系型数据库，遵循 SQL 标准。
