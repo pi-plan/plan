@@ -9,7 +9,7 @@ A2PC （Asynchronous Two-Phase Commit）是一个安全、高性能、开源的�
 
 ## 事务保障
 1. 第一步，开启本地事务，在本地事务中执行业务 SQL。并解析 SQL 语句，计算出写入前（undo log）和写入后（redo log）的镜像。
-2. 第二步，申请全局锁和写入 reundo 日志。申请到全局锁之后提交本地事务，如果无法申请到全局锁，就回滚本地事务。
+2. 第二步，申请全局锁和持久化 reundo 日志。这一步骤在 TM 中是一个本地事务，可以保障申请到全局锁的情况下 reundo log 一定是持久化成功的。申请到全局锁之后提交本地事务，如果无法申请到全局锁，就回滚本地事务。
 3. 第三步：
     - **提交**，因为在第二步的时候已经提交过本地资源。TM 只需要修改全局事务状态即可提价事务，释放全局锁。
     - **回滚**，在第二步的时候已经写入了 reundo log，根据 reundo log TM 会讲 RM 中的数据进行回滚，如果当中有超时，TM 会一直重试直到成功后释放全局锁。
@@ -36,6 +36,7 @@ CREATE TABLE `order` (
   UNIQUE KEY `un_up` (`user_id`,`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
+
 PiDAL 在启动的时候会解析表结构并记录下来。
 
 当用户 1 下单 商品 id 2 的时候的时候。order 表初始数据为空。product 表数据为：
